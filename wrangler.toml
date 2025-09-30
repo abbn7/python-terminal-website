@@ -1,0 +1,37 @@
+name = "python-terminal-website"
+compatibility_date = "2024-09-30"
+
+[env.production]
+account_id = ""
+zone_id = ""
+
+[[env.production.routes]]
+pattern = "python-terminal.pages.dev/*"
+zone_name = "pages.dev"
+
+[build]
+command = ""
+cwd = ""
+watch_dir = ""
+
+[build.upload]
+format = "modules"
+
+[[headers]]
+for = "/*"
+[headers.values]
+"Cross-Origin-Embedder-Policy" = "require-corp"
+"Cross-Origin-Opener-Policy" = "same-origin"
+
+[[headers]]
+for = "/*.wasm"
+[headers.values]
+"Content-Type" = "application/wasm"
+"Cross-Origin-Embedder-Policy" = "require-corp"
+"Cross-Origin-Opener-Policy" = "same-origin"
+
+[[headers]]
+for = "/*.js"
+[headers.values]
+"Cross-Origin-Embedder-Policy" = "require-corp"
+"Cross-Origin-Opener-Policy" = "same-origin"

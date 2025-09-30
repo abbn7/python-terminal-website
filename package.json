@@ -1,0 +1,29 @@
+{
+  "name": "python-terminal-website",
+  "version": "1.0.0",
+  "description": "موقع ويب تفاعلي لتشغيل كود Python في المتصفح باستخدام Pyodide",
+  "main": "index.html",
+  "scripts": {
+    "dev": "python3 -m http.server 8080",
+    "build": "echo 'Static site - no build needed'",
+    "deploy": "wrangler pages publish . --project-name=python-terminal-website"
+  },
+  "keywords": [
+    "python",
+    "terminal",
+    "pyodide",
+    "web",
+    "interactive",
+    "coding"
+  ],
+  "author": "Python Terminal Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/abbn7/python-terminal-website.git"
+  },
+  "homepage": "https://python-terminal-website.pages.dev",
+  "devDependencies": {
+    "wrangler": "^3.0.0"
+  }
+}

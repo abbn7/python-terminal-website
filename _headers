@@ -1,0 +1,23 @@
+/*
+  Cross-Origin-Embedder-Policy: require-corp
+  Cross-Origin-Opener-Policy: same-origin
+
+/pyodide/*
+  Cross-Origin-Embedder-Policy: require-corp
+  Cross-Origin-Opener-Policy: same-origin
+  Cache-Control: public, max-age=31536000, immutable
+
+/*.wasm
+  Cross-Origin-Embedder-Policy: require-corp
+  Cross-Origin-Opener-Policy: same-origin
+  Content-Type: application/wasm
+
+/*.js
+  Cross-Origin-Embedder-Policy: require-corp
+  Cross-Origin-Opener-Policy: same-origin
+
+/*.css
+  Cache-Control: public, max-age=86400
+
+/*.html
+  Cache-Control: public, max-age=3600
