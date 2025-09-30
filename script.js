@@ -320,3 +320,75 @@ document.addEventListener('DOMContentLoaded', () => {
 document.getElementById('darkModeBtn')?.addEventListener('click', () => {
     document.body.classList.toggle('dark');
 });
+
+
+// Add floating particles animation
+function createParticles() {
+    const particlesContainer = document.getElementById('particles');
+    const particleCount = 50;
+    
+    for (let i = 0; i < particleCount; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.left = Math.random() * 100 + '%';
+        particle.style.top = Math.random() * 100 + '%';
+        particle.style.animationDelay = Math.random() * 6 + 's';
+        particle.style.animationDuration = (Math.random() * 3 + 3) + 's';
+        particlesContainer.appendChild(particle);
+    }
+}
+
+// Header scroll effect
+function handleHeaderScroll() {
+    const header = document.querySelector('.header');
+    let lastScrollY = window.scrollY;
+    
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 50) {
+            header.classList.add('scrolled');
+        } else {
+            header.classList.remove('scrolled');
+        }
+        lastScrollY = window.scrollY;
+    });
+}
+
+// Initialize visual effects when page loads
+document.addEventListener('DOMContentLoaded', () => {
+    createParticles();
+    handleHeaderScroll();
+});
+
+// Enhanced terminal output rendering with better animations
+PythonTerminal.prototype.renderOutput = function() {
+    if (this.output.length === 0) {
+        this.terminalOutput.innerHTML = `
+            <div class="text-gray-500 text-center py-12">
+                مرحبا بك في Python Terminal! اكتب كود Python وانقر على "تشغيل" أو اضغط Ctrl+Enter
+            </div>
+        `;
+        return;
+    }
+
+    this.terminalOutput.innerHTML = this.output.map(item => {
+        const typeClass = this.getTypeClass(item.type);
+        const typeLabel = this.getTypeLabel(item.type);
+        
+        return `
+            <div class="output-line ${item.type} mb-3">
+                <div class="timestamp">
+                    [${item.timestamp}] ${typeLabel}
+                </div>
+                <div class="${typeClass} whitespace-pre-wrap">
+                    ${this.escapeHtml(item.content)}
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    // Scroll to bottom with smooth animation
+    this.terminalOutput.scrollTo({
+        top: this.terminalOutput.scrollHeight,
+        behavior: 'smooth'
+    });
+};
