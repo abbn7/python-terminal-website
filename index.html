@@ -3,115 +3,74 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Python Terminal — RED BOX</title>
+  <title>Python Terminal — RED BOX (abdelhamed nada)</title>
 
-  <!-- Tailwind CDN (خفيفة وسريعة للتجريب) -->
-  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Simple professional fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="styles.css">
+
+  <!-- Ace Editor (محرر محترف خفيف) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.14/ace.js" integrity="sha512-/9nGx86n1k2x4n0r1Z2p8pGx4M9qf7wG2kI7dLzK/2o8sQXx8x7V0Y3wq9x2Lkz6g1p3zJqXwK7p1V8F4g1hUg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
   <!-- Pyodide -->
-  <script>
-    // تقدر تغير النسخة لو عايز
-    window.PYODIDE_URL = "https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js";
-  </script>
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js"></script>
 
-  <link rel="stylesheet" href="styles.css" />
-
-  <style>
-    /* تميت الشاشة الداكنة AMOLED (أسود حقيقي) */
-    :root { --am-black: #000000; --panel: #0b0b0b; --muted: #6b6b6b; --accent: #6ee7b7; }
-    body { background: var(--am-black); color: #e6eef0; -webkit-font-smoothing:antialiased; font-family: Inter, ui-sans-serif, system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial; }
-  </style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-start">
-
-  <!-- Watermark / Developer badge -->
-  <div class="w-full max-w-6xl px-4 mt-4">
-    <div class="flex justify-between items-center">
-      <div class="flex items-center gap-3">
-        <div class="text-sm font-semibold text-gray-300">Python Terminal</div>
-        <div class="text-xs text-gray-500">— تجربة تشغيل بايثون محليًا في المتصفح</div>
-      </div>
-
-      <div class="text-right">
-        <div class="text-xs text-gray-400">المطور:</div>
-        <div class="text-sm font-medium text-accent">abdelhamed nada</div>
-        <div class="text-xs text-gray-500">واتساب: 01086144345</div>
-      </div>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">RED BOX</div>
+      <div class="title">Python Terminal — تشغيل بايثون في المتصفح</div>
     </div>
-  </div>
+    <div class="dev">
+      <div class="dev-name">Developer: <span>abdelhamed nada</span></div>
+      <div class="dev-contact">WhatsApp: <span>01086144345</span></div>
+    </div>
+  </header>
 
-  <!-- Main container: شاشة مربوطة، التيرمنال أول حاجة -->
-  <main class="w-full max-w-6xl px-4 py-6">
-    <div id="app" class="rounded-lg overflow-hidden border border-gray-800" style="background:linear-gradient(180deg,#050505, #0b0b0b); box-shadow: 0 10px 40px rgba(0,0,0,0.8)">
+  <main class="container">
+    <section class="left">
+      <div class="toolbar">
+        <button id="runBtn" class="btn primary">RUN ▶</button>
+        <button id="stopBtn" class="btn">STOP</button>
+        <button id="clearBtn" class="btn">CLEAR OUTPUT</button>
+        <input id="pkgInput" placeholder="مثال: numpy" class="pkg-input" />
+        <button id="installBtn" class="btn">تثبيت باكيج</button>
+        <div id="status" class="status">جاري التحميل...</div>
+      </div>
 
-      <!-- Top toolbar (compact) -->
-      <div class="flex items-center justify-between p-3 border-b border-gray-800">
-        <div class="flex items-center gap-3">
-          <button id="runBtn" class="px-3 py-1 rounded-md text-sm font-medium bg-gradient-to-r from-green-500 to-green-400 shadow-sm">RUN ▶</button>
-          <button id="clearBtn" class="px-3 py-1 rounded-md text-sm font-medium bg-gray-800/60">CLEAR</button>
-          <button id="installBtn" class="px-3 py-1 rounded-md text-sm font-medium bg-blue-700/40">تثبيت باكيج</button>
-          <input id="pkgInput" placeholder="اسم الباكيج (مثال: micropip)" class="rtl px-2 py-1 bg-transparent border border-gray-700 rounded-md text-sm w-40" />
+      <div id="editor" class="editor" aria-label="Python editor">
+// اكتب كود بايثون هنا
+print("Hello from RED BOX — abdelhamed nada")
+for i in range(3):
+    print("line", i)
+      </div>
+    </section>
+
+    <section class="right">
+      <div class="panel">
+        <div class="panel-title">Output</div>
+        <div id="output" class="output">اضغط RUN لبدء التنفيذ...</div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">معلومات سريعة</div>
+        <div class="panel-body">
+          <ul>
+            <li>Pyodide يعمل محليًا داخل المتصفح (لا يُرسل الكود للسيرفر).</li>
+            <li>تدعم تثبيت باكيجات (micropip).</li>
+            <li>محرر ACE مع تلوين الصيغة وقياس السطور.</li>
+          </ul>
         </div>
-
-        <div class="text-xs text-gray-400">وضع: <span id="status">تحميل Pyodide...</span></div>
       </div>
-
-      <!-- Terminal + Editor + Output region -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
-        <!-- Terminal (محاكاة تيرمنال) -->
-        <section class="col-span-1 md:col-span-2">
-          <div class="rounded-md overflow-hidden border border-gray-800">
-            <div class="flex items-center justify-between px-3 py-2 bg-[#050505] border-b border-gray-800">
-              <div class="flex items-center gap-2">
-                <div class="h-3 w-3 rounded-full bg-red-500"></div>
-                <div class="h-3 w-3 rounded-full bg-yellow-400"></div>
-                <div class="h-3 w-3 rounded-full bg-green-500"></div>
-                <div class="text-sm text-gray-400 mr-2">Terminal (تيرمنال)</div>
-              </div>
-              <div class="text-xs text-gray-500">Developer: abdelhamed nada — واتساب: 01086144345</div>
-            </div>
-
-            <div class="p-4 bg-[#070707] flex flex-col gap-3">
-              <!-- Editor (الكود بيبقى فوق) -->
-              <label class="text-sm text-gray-400">Code Editor</label>
-              <textarea id="codeEditor" spellcheck="false" class="w-full h-48 md:h-64 bg-[#0b0b0b] text-[#d6f8e6] font-mono text-sm p-3 rounded-md resize-vertical border border-gray-800"
-placeholder="# اكتب كود بايثون هنا\nprint('Hello from RED BOX')\n"></textarea>
-
-              <!-- Output (نفس الشاشة وبتظهر تحت بعد الرن) -->
-              <label class="text-sm text-gray-400">Output</label>
-              <div id="output" class="w-full min-h-24 max-h-72 overflow-auto bg-[#050505] text-[#cfeee2] font-mono text-sm p-3 rounded-md border border-gray-800">
-                <div class="text-xs text-gray-500">اضغط RUN لعرض النتيجة هنا...</div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- Controls / help (أدوات جانبية بسيطة) -->
-        <aside class="col-span-1">
-          <div class="p-4 rounded-md border border-gray-800 bg-[#080808]">
-            <h3 class="text-sm font-semibold mb-2">معلومات سريعة</h3>
-            <ul class="text-xs text-gray-400 space-y-2">
-              <li>✓ Pyodide يعمل داخل المتصفح — الكود لا يخرج للسيرفر.</li>
-              <li>✓ يمكنك تثبيت باكيجات متوافقة عبر خانة التثبيت.</li>
-              <li>✓ الدارك مود AMOLED مفعل.</li>
-            </ul>
-            <hr class="my-3 border-gray-800" />
-            <div class="text-xs text-gray-400">
-              <div>لو حابب إضافات أكبر (رفع ملفات، دعم CodeMirror، حفظ جلسات) أقولك أعملها وبجهزها لك.</div>
-            </div>
-          </div>
-        </aside>
-
-      </div>
-
-      <!-- Footer / contact -->
-      <div class="px-4 py-3 border-t border-gray-800 flex justify-between items-center text-xs text-gray-500">
-        <div>RED BOX • Python Terminal — Open Source</div>
-        <div>Developed by <span class="font-medium text-accent">abdelhamed nada</span> — WhatsApp: <span class="font-medium text-accent">01086144345</span></div>
-      </div>
-
-    </div>
+    </section>
   </main>
+
+  <footer class="footer">
+    RED BOX • Developed by <strong>abdelhamed nada</strong> — WhatsApp: <strong>01086144345</strong>
+  </footer>
 
   <script src="script.js"></script>
 </body>
