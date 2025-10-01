@@ -1,189 +1,118 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Python Terminal - تشغيل كود بايثون في المتصفح</title>
-    <script src="https://cdn.jsdelivr.net/pyodide/v0.28.3/full/pyodide.js"></script>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Python Terminal — RED BOX</title>
 
+  <!-- Tailwind CDN (خفيفة وسريعة للتجريب) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Pyodide -->
+  <script>
+    // تقدر تغير النسخة لو عايز
+    window.PYODIDE_URL = "https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js";
+  </script>
+
+  <link rel="stylesheet" href="styles.css" />
+
+  <style>
+    /* تميت الشاشة الداكنة AMOLED (أسود حقيقي) */
+    :root { --am-black: #000000; --panel: #0b0b0b; --muted: #6b6b6b; --accent: #6ee7b7; }
+    body { background: var(--am-black); color: #e6eef0; -webkit-font-smoothing:antialiased; font-family: Inter, ui-sans-serif, system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial; }
+  </style>
 </head>
-<body>
-    <!-- Animated Background -->
-    <div class="animated-bg"></div>
-    
-    <!-- Floating Particles -->
-    <div class="particles" id="particles"></div>
-    <!-- Header -->
-    <header class="header">
-        <div class="max-w-7xl mx-auto px-4 py-4">
-            <div class="flex justify-between items-center">
-                <div class="logo">
-                    <i class="fas fa-terminal"></i>
-                    <h1>Python Terminal</h1>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <button id="darkModeBtn" class="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors">
-                        <i class="fas fa-moon"></i>
-                    </button>
-                    <a href="https://github.com" target="_blank" class="flex items-center space-x-2 px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition-colors">
-                        <i class="fab fa-github"></i>
-                        <span>GitHub</span>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </header>
+<body class="min-h-screen flex flex-col items-center justify-start">
 
-    <!-- Hero Section -->
-    <section class="hero py-16">
-        <div class="max-w-7xl mx-auto px-4 text-center hero-content">
-            <h2>تشغيل كود Python في المتصفح</h2>
-            <p>منصة تفاعلية لكتابة وتشغيل كود Python مباشرة في المتصفح مع واجهة terminal جميلة وسهلة الاستخدام</p>
-            
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16">
-                <div class="feature-card">
-                    <i class="fas fa-bolt"></i>
-                    <h3 class="text-xl font-semibold mb-3">سريع وفوري</h3>
-                    <p class="text-gray-600">تشغيل فوري للكود بدون الحاجة لتثبيت Python محلياً</p>
-                </div>
-                
-                <div class="feature-card">
-                    <i class="fas fa-palette"></i>
-                    <h3 class="text-xl font-semibold mb-3">واجهة جميلة</h3>
-                    <p class="text-gray-600">terminal ملون مع syntax highlighting وتجربة مستخدم ممتازة</p>
-                </div>
-                
-                <div class="feature-card">
-                    <i class="fab fa-github"></i>
-                    <h3 class="text-xl font-semibold mb-3">مفتوح المصدر</h3>
-                    <p class="text-gray-600">كود مفتوح المصدر يمكن تطويره وتخصيصه حسب الحاجة</p>
-                </div>
-            </div>
-        </div>
-    </section>
+  <!-- Watermark / Developer badge -->
+  <div class="w-full max-w-6xl px-4 mt-4">
+    <div class="flex justify-between items-center">
+      <div class="flex items-center gap-3">
+        <div class="text-sm font-semibold text-gray-300">Python Terminal</div>
+        <div class="text-xs text-gray-500">— تجربة تشغيل بايثون محليًا في المتصفح</div>
+      </div>
 
-    <!-- Main Terminal -->
-    <main class="py-16">
-        <div class="max-w-6xl mx-auto px-4">
-            <!-- Loading Screen -->
-            <div id="loadingScreen" class="text-center py-20">
-                <div class="loading-spinner mb-6"></div>
-                <h2 class="text-3xl font-bold mb-4">جاري تحميل Python...</h2>
-                <p class="text-xl text-gray-600 mb-6">يرجى الانتظار بينما نقوم بتحميل بيئة Python في المتصفح</p>
-                <div class="progress-bar max-w-md mx-auto">
-                    <div id="loadingProgress" class="progress-fill" style="width: 0%"></div>
-                </div>
+      <div class="text-right">
+        <div class="text-xs text-gray-400">المطور:</div>
+        <div class="text-sm font-medium text-accent">abdelhamed nada</div>
+        <div class="text-xs text-gray-500">واتساب: 01086144345</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main container: شاشة مربوطة، التيرمنال أول حاجة -->
+  <main class="w-full max-w-6xl px-4 py-6">
+    <div id="app" class="rounded-lg overflow-hidden border border-gray-800" style="background:linear-gradient(180deg,#050505, #0b0b0b); box-shadow: 0 10px 40px rgba(0,0,0,0.8)">
+
+      <!-- Top toolbar (compact) -->
+      <div class="flex items-center justify-between p-3 border-b border-gray-800">
+        <div class="flex items-center gap-3">
+          <button id="runBtn" class="px-3 py-1 rounded-md text-sm font-medium bg-gradient-to-r from-green-500 to-green-400 shadow-sm">RUN ▶</button>
+          <button id="clearBtn" class="px-3 py-1 rounded-md text-sm font-medium bg-gray-800/60">CLEAR</button>
+          <button id="installBtn" class="px-3 py-1 rounded-md text-sm font-medium bg-blue-700/40">تثبيت باكيج</button>
+          <input id="pkgInput" placeholder="اسم الباكيج (مثال: micropip)" class="rtl px-2 py-1 bg-transparent border border-gray-700 rounded-md text-sm w-40" />
+        </div>
+
+        <div class="text-xs text-gray-400">وضع: <span id="status">تحميل Pyodide...</span></div>
+      </div>
+
+      <!-- Terminal + Editor + Output region -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
+        <!-- Terminal (محاكاة تيرمنال) -->
+        <section class="col-span-1 md:col-span-2">
+          <div class="rounded-md overflow-hidden border border-gray-800">
+            <div class="flex items-center justify-between px-3 py-2 bg-[#050505] border-b border-gray-800">
+              <div class="flex items-center gap-2">
+                <div class="h-3 w-3 rounded-full bg-red-500"></div>
+                <div class="h-3 w-3 rounded-full bg-yellow-400"></div>
+                <div class="h-3 w-3 rounded-full bg-green-500"></div>
+                <div class="text-sm text-gray-400 mr-2">Terminal (تيرمنال)</div>
+              </div>
+              <div class="text-xs text-gray-500">Developer: abdelhamed nada — واتساب: 01086144345</div>
             </div>
 
-            <!-- Terminal Interface -->
-            <div id="terminalInterface" class="hidden space-y-8">
-                <!-- Controls -->
-                <div class="flex justify-between items-center">
-                    <h1 class="text-4xl font-bold logo">Python Terminal</h1>
-                    <div class="flex gap-3">
-                        <button id="copyBtn" class="btn btn-secondary">
-                            <i class="fas fa-copy"></i>
-                            <span>نسخ المخرجات</span>
-                        </button>
-                        <button id="downloadBtn" class="btn btn-secondary">
-                            <i class="fas fa-download"></i>
-                            <span>تحميل</span>
-                        </button>
-                        <button id="resetBtn" class="btn btn-secondary">
-                            <i class="fas fa-redo"></i>
-                            <span>إعادة تعيين</span>
-                        </button>
-                        <button id="clearBtn" class="btn btn-secondary">
-                            <i class="fas fa-trash"></i>
-                            <span>مسح</span>
-                        </button>
-                    </div>
-                </div>
+            <div class="p-4 bg-[#070707] flex flex-col gap-3">
+              <!-- Editor (الكود بيبقى فوق) -->
+              <label class="text-sm text-gray-400">Code Editor</label>
+              <textarea id="codeEditor" spellcheck="false" class="w-full h-48 md:h-64 bg-[#0b0b0b] text-[#d6f8e6] font-mono text-sm p-3 rounded-md resize-vertical border border-gray-800"
+placeholder="# اكتب كود بايثون هنا\nprint('Hello from RED BOX')\n"></textarea>
 
-                <!-- Package Installation -->
-                <div class="package-section">
-                    <h3 class="text-xl font-semibold mb-4">تثبيت مكتبات Python</h3>
-                    <div class="flex gap-3">
-                        <input type="text" id="packageInput" placeholder="اسم المكتبة (مثل: pandas, scipy, scikit-learn)" 
-                               class="package-input">
-                        <button id="installBtn" class="btn btn-primary">
-                            <i class="fas fa-download"></i>
-                            <span>تثبيت</span>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Examples -->
-                <div>
-                    <h3 class="text-lg font-semibold mb-4">أمثلة سريعة:</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-                        <button class="example-btn text-right p-3 rounded-lg text-sm font-mono bg-white" 
-                                data-code='print("مرحبا بك في Python Terminal!")'>
-                            print("مرحبا بك في Python Terminal!")
-                        </button>
-                        <button class="example-btn text-right p-3 rounded-lg text-sm font-mono bg-white" 
-                                data-code='for i in range(5):&#10;    print(f"العدد: {i}")'>
-                            for i in range(5):<br>&nbsp;&nbsp;&nbsp;&nbsp;print(f"العدد: {i}")
-                        </button>
-                        <button class="example-btn text-right p-3 rounded-lg text-sm font-mono bg-white" 
-                                data-code='import math&#10;print(f"قيمة π = {math.pi:.4f}")'>
-                            import math<br>print(f"قيمة π = {math.pi:.4f}")
-                        </button>
-                        <button class="example-btn text-right p-3 rounded-lg text-sm font-mono bg-white" 
-                                data-code='numbers = [1, 2, 3, 4, 5]&#10;print(f"المجموع: {sum(numbers)}")'>
-                            numbers = [1, 2, 3, 4, 5]<br>print(f"المجموع: {sum(numbers)}")
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Terminal Output -->
-                <div class="terminal-container">
-                    <div class="terminal">
-                        <div class="terminal-header">
-                            <div class="terminal-dots">
-                                <div class="dot red"></div>
-                                <div class="dot yellow"></div>
-                                <div class="dot green"></div>
-                            </div>
-                            <div class="terminal-title">Python Terminal</div>
-                        </div>
-                        <div id="terminalOutput" class="terminal-output">
-                            <div class="text-gray-500 text-center py-12">
-                                مرحبا بك في Python Terminal! اكتب كود Python وانقر على "تشغيل" أو اضغط Ctrl+Enter
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Input Area -->
-                <div class="input-area">
-                    <textarea id="codeInput" placeholder="اكتب كود Python هنا... (Ctrl+Enter للتشغيل)" 
-                              class="code-input"></textarea>
-                    <div class="flex justify-between items-center mt-4">
-                        <div class="text-sm text-gray-500">
-                            استخدم الأسهم ↑↓ للتنقل في التاريخ | Ctrl+Enter للتشغيل
-                        </div>
-                        <button id="runBtn" class="btn btn-primary">
-                            <i class="fas fa-play"></i>
-                            <span>تشغيل</span>
-                        </button>
-                    </div>
-                </div>
+              <!-- Output (نفس الشاشة وبتظهر تحت بعد الرن) -->
+              <label class="text-sm text-gray-400">Output</label>
+              <div id="output" class="w-full min-h-24 max-h-72 overflow-auto bg-[#050505] text-[#cfeee2] font-mono text-sm p-3 rounded-md border border-gray-800">
+                <div class="text-xs text-gray-500">اضغط RUN لعرض النتيجة هنا...</div>
+              </div>
             </div>
-        </div>
-    </main>
+          </div>
+        </section>
 
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="max-w-7xl mx-auto px-4 py-8 text-center">
-            <p class="text-lg mb-2">تم تطوير هذا الموقع باستخدام Pyodide و Cloudflare Pages</p>
-            <p class="text-sm">© 2024 Python Terminal. جميع الحقوق محفوظة.</p>
-        </div>
-    </footer>
+        <!-- Controls / help (أدوات جانبية بسيطة) -->
+        <aside class="col-span-1">
+          <div class="p-4 rounded-md border border-gray-800 bg-[#080808]">
+            <h3 class="text-sm font-semibold mb-2">معلومات سريعة</h3>
+            <ul class="text-xs text-gray-400 space-y-2">
+              <li>✓ Pyodide يعمل داخل المتصفح — الكود لا يخرج للسيرفر.</li>
+              <li>✓ يمكنك تثبيت باكيجات متوافقة عبر خانة التثبيت.</li>
+              <li>✓ الدارك مود AMOLED مفعل.</li>
+            </ul>
+            <hr class="my-3 border-gray-800" />
+            <div class="text-xs text-gray-400">
+              <div>لو حابب إضافات أكبر (رفع ملفات، دعم CodeMirror، حفظ جلسات) أقولك أعملها وبجهزها لك.</div>
+            </div>
+          </div>
+        </aside>
 
-    <script src="script.js"></script>
+      </div>
+
+      <!-- Footer / contact -->
+      <div class="px-4 py-3 border-t border-gray-800 flex justify-between items-center text-xs text-gray-500">
+        <div>RED BOX • Python Terminal — Open Source</div>
+        <div>Developed by <span class="font-medium text-accent">abdelhamed nada</span> — WhatsApp: <span class="font-medium text-accent">01086144345</span></div>
+      </div>
+
+    </div>
+  </main>
+
+  <script src="script.js"></script>
 </body>
 </html>
