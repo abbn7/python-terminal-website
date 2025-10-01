@@ -3,198 +3,262 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Python Terminal Pro - بواسطة أحمد</title>
+    <title>Python Terminal Pro - تيرمينال بايثون متكامل</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js"></script>
 </head>
 <body>
-    <!-- شريط التنقل العلوي -->
-    <nav class="navbar">
-        <div class="nav-container">
-            <div class="nav-logo">
-                <i class="fab fa-python"></i>
-                <span>Python Terminal Pro</span>
+    <!-- الشاشة الرئيسية -->
+    <div class="terminal-container">
+        <!-- شريط العنوان -->
+        <div class="title-bar">
+            <div class="window-controls">
+                <div class="control close"></div>
+                <div class="control minimize"></div>
+                <div class="control maximize"></div>
             </div>
-            <div class="nav-menu">
-                <a href="#" class="nav-link" id="new-file-btn">
-                    <i class="fas fa-file-code"></i> ملف جديد
-                </a>
-                <a href="#" class="nav-link" id="run-btn">
-                    <i class="fas fa-play"></i> تشغيل
-                </a>
-                <a href="#" class="nav-link" id="clear-btn">
-                    <i class="fas fa-broom"></i> مسح
-                </a>
-                <a href="#" class="nav-link" id="examples-btn">
-                    <i class="fas fa-lightbulb"></i> أمثلة
-                </a>
+            <div class="title">Python Terminal Pro - تيرمينال بايثون</div>
+            <div class="status">
+                <span class="status-indicator" id="status">● جاهز</span>
             </div>
         </div>
-    </nav>
 
-    <!-- المحتوى الرئيسي -->
-    <main class="main-container">
-        <!-- الشريط الجانبي -->
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <h3>ملفات المشروع</h3>
-                <button class="add-file-btn">
-                    <i class="fas fa-plus"></i>
-                </button>
-            </div>
-            <div class="file-list">
-                <div class="file-item active">
-                    <i class="fas fa-file-code"></i>
-                    <span>main.py</span>
-                </div>
-                <div class="file-item">
-                    <i class="fas fa-file-code"></i>
-                    <span>utils.py</span>
-                </div>
-                <div class="file-item">
-                    <i class="fas fa-file-code"></i>
-                    <span>data.py</span>
-                </div>
-            </div>
+        <!-- شريط الأدوات -->
+        <div class="toolbar">
+            <button class="tool-btn" id="run-code">
+                <i class="fas fa-play"></i> تشغيل
+            </button>
+            <button class="tool-btn" id="clear-terminal">
+                <i class="fas fa-trash"></i> مسح
+            </button>
+            <button class="tool-btn" id="save-code">
+                <i class="fas fa-save"></i> حفظ
+            </button>
+            <button class="tool-btn" id="load-code">
+                <i class="fas fa-folder-open"></i> فتح
+            </button>
+            <button class="tool-btn" id="examples-btn">
+                <i class="fas fa-code"></i> أمثلة
+            </button>
+            <button class="tool-btn" id="help-btn">
+                <i class="fas fa-question-circle"></i> مساعدة
+            </button>
+            <div class="spacer"></div>
+            <button class="tool-btn" id="theme-toggle">
+                <i class="fas fa-moon"></i> مظهر
+            </button>
+        </div>
 
-            <div class="sidebar-section">
-                <h3>المساعد الذكي</h3>
-                <div class="ai-assistant">
-                    <div class="ai-message">
-                        <p>مرحباً! أنا مساعدك الذكي. يمكنني مساعدتك في كتابة كود بايثون.</p>
+        <!-- منطقة المحرر والإخراج -->
+        <div class="content-area">
+            <!-- المحرر -->
+            <div class="editor-panel">
+                <div class="panel-header">
+                    <i class="fas fa-edit"></i>
+                    <span>محرر الكود</span>
+                    <div class="file-info">main.py</div>
+                </div>
+                <div class="editor-container">
+                    <div class="line-numbers" id="line-numbers">
+                        <span>1</span>
                     </div>
-                    <button class="ai-help-btn">
-                        <i class="fas fa-robot"></i> طلب المساعدة
-                    </button>
-                </div>
-            </div>
-        </aside>
+                    <textarea class="code-input" id="code-input" spellcheck="false" placeholder="# اكتب كود بايثون هنا
+# اضغط Ctrl+Enter لتشغيل الكود">print("🚀 مرحباً بك في Python Terminal Pro!")
+print("✨ هذا تيرمينال بايثون حقيقي يعمل في المتصفح")
 
-        <!-- منطقة المحرر -->
-        <section class="editor-section">
-            <div class="editor-header">
-                <div class="file-tabs">
-                    <div class="file-tab active">
-                        <span>main.py</span>
-                        <button class="close-tab"><i class="fas fa-times"></i></button>
-                    </div>
-                </div>
-                <div class="editor-controls">
-                    <button class="control-btn" id="theme-toggle">
-                        <i class="fas fa-moon"></i>
-                    </button>
-                    <button class="control-btn" id="fullscreen-toggle">
-                        <i class="fas fa-expand"></i>
-                    </button>
-                </div>
-            </div>
-
-            <div class="editor-container">
-                <div class="line-numbers">
-                    <div class="line-number">1</div>
-                    <div class="line-number">2</div>
-                    <div class="line-number">3</div>
-                    <div class="line-number">4</div>
-                    <div class="line-number">5</div>
-                    <div class="line-number">6</div>
-                    <div class="line-number">7</div>
-                    <div class="line-number">8</div>
-                    <div class="line-number">9</div>
-                    <div class="line-number">10</div>
-                </div>
-                <textarea class="code-editor" id="python-code" placeholder="# اكتب كود بايثون هنا...">print("مرحباً بك في Python Terminal Pro!")
-print("هذا المحاكي يدعم معظم أوامر بايثون الأساسية")
-
-# جرب كتابة بعض الأوامر
+# يمكنك كتابة وتنفيذ أي كود بايثون هنا
 name = input("ما هو اسمك؟ ")
-print(f"أهلاً {name}!")
+print(f"أهلاً وسهلاً {name}!")
 
-# مثال على حلقة
-for i in range(5):
-    print(f"رقم: {i}")
+# تجربة بعض الميزات
+for i in range(3):
+    print(f"جولة رقم {i+1}")
 
-# مثال على دالة
-def greet(name):
-    return f"مرحباً {name}!"
+def calculate(a, b):
+    return a + b, a - b, a * b, a / b
 
-print(greet("المستخدم"))</textarea>
+result = calculate(10, 5)
+print(f"نتيجة العمليات: {result}")</textarea>
+                </div>
             </div>
-        </section>
 
-        <!-- منطقة الإخراج -->
-        <section class="output-section">
-            <div class="output-header">
-                <h3>الإخراج</h3>
-                <div class="output-controls">
-                    <button class="control-btn" id="copy-output">
-                        <i class="fas fa-copy"></i>
-                    </button>
-                    <button class="control-btn" id="clear-output">
-                        <i class="fas fa-trash"></i>
+            <!-- التيرمينال -->
+            <div class="terminal-panel">
+                <div class="panel-header">
+                    <i class="fas fa-terminal"></i>
+                    <span>تيرمينال بايثون</span>
+                    <div class="terminal-info" id="terminal-info">بايثون 3.11.0</div>
+                </div>
+                <div class="terminal-output" id="terminal-output">
+                    <div class="welcome-message">
+                        <div class="ascii-art">
+                            <pre>
+  ____        _   _                 _____ _             _             
+ |  _ \ _   _| |_| |__   ___  _ __ |_   _(_)_ __  _ __ | | ___  _ __  
+ | |_) | | | | __| '_ \ / _ \| '_ \  | | | | '_ \| '_ \| |/ _ \| '_ \ 
+ |  __/| |_| | |_| | | | (_) | | | | | | | | | | | | | | | (_) | | | |
+ |_|    \__, |\__|_| |_|\___/|_| |_| |_| |_|_| |_|_| |_|_|\___/|_| |_|
+        |___/                                                          
+                            </pre>
+                        </div>
+                        <div class="welcome-text">
+                            <h3>🐍 Python Terminal Pro</h3>
+                            <p>تيرمينال بايثون متكامل يعمل في المتصفح</p>
+                            <p>⚡ يدعم مكتبات بايثون الأساسية والعمليات الحسابية</p>
+                            <p>💾 يمكنك حفظ وفتح الملفات مباشرة من المتصفح</p>
+                            <p>🔧 اضغط <kbd>Ctrl+Enter</kbd> لتشغيل الكود</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="terminal-input-line">
+                    <span class="prompt">&gt;&gt;&gt;</span>
+                    <input type="text" class="terminal-input" id="terminal-input" placeholder="اكتب أمر بايثون هنا أو استخدم المحرر للأكواد الطويلة">
+                    <button class="execute-btn" id="execute-terminal">
+                        <i class="fas fa-play"></i>
                     </button>
                 </div>
             </div>
-            <div class="output-container" id="output">
-                <div class="welcome-message">
-                    <h4>مرحباً بك في Python Terminal Pro!</h4>
-                    <p>هذا المحاكي يتيح لك تشغيل كود بايثون مباشرة في المتصفح.</p>
-                    <p>اضغط على زر "تشغيل" أو Ctrl+Enter لتشغيل الكود.</p>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <!-- زر الواتساب العائم -->
-    <div class="whatsapp-float">
-        <a href="https://wa.me/201096144345" target="_blank" class="whatsapp-link">
-            <i class="fab fa-whatsapp"></i>
-        </a>
-    </div>
-
-    <!-- الفوتر -->
-    <footer class="footer">
-        <div class="footer-content">
-            <p>تم التطوير بواسطة <strong>أحمد</strong> - للتواصل عبر الواتساب: <strong>01096144345</strong></p>
-            <p>Python Terminal Pro &copy; 2023 - جميع الحقوق محفوظة</p>
         </div>
-    </footer>
+
+        <!-- شريط الحالة -->
+        <div class="status-bar">
+            <div class="status-item">
+                <i class="fas fa-code"></i>
+                <span id="line-count">1 سطر</span>
+            </div>
+            <div class="status-item">
+                <i class="fas fa-bolt"></i>
+                <span id="pyodide-status">جاري تحميل بايثون...</span>
+            </div>
+            <div class="status-item">
+                <i class="fas fa-memory"></i>
+                <span>ذاكرة: <span id="memory-usage">0MB</span></span>
+            </div>
+            <div class="status-item developer-info">
+                <i class="fas fa-user"></i>
+                <span>مطور بواسطة: أحمد - </span>
+                <a href="https://wa.me/201096144345" class="whatsapp-link" target="_blank">
+                    <i class="fab fa-whatsapp"></i> 01096144345
+                </a>
+            </div>
+        </div>
+    </div>
 
     <!-- نافذة الأمثلة -->
     <div class="modal" id="examples-modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>أمثلة على كود بايثون</h3>
-                <button class="close-modal">&times;</button>
+                <h3><i class="fas fa-code"></i> أمثلة بايثون جاهزة</h3>
+                <button class="close-btn" id="close-examples">&times;</button>
             </div>
             <div class="modal-body">
-                <div class="example-category">
-                    <h4>أمثلة أساسية</h4>
-                    <div class="example-item" data-code='print("Hello, World!")'>
-                        طباعة رسالة ترحيب
+                <div class="examples-grid">
+                    <div class="example-category">
+                        <h4>🔰 أساسيات بايثون</h4>
+                        <div class="example-item" data-code='print("Hello, World!")'>
+                            <span>طباعة رسالة ترحيب</span>
+                            <i class="fas fa-arrow-left"></i>
+                        </div>
+                        <div class="example-item" data-code='name = input("ما هو اسمك؟ ")\nprint(f"مرحباً {name}!")'>
+                            <span>التفاعل مع المستخدم</span>
+                            <i class="fas fa-arrow-left"></i>
+                        </div>
+                        <div class="example-item" data-code='for i in range(1, 6):\n    print(f"رقم: {i}")'>
+                            <span>حلقة for بسيطة</span>
+                            <i class="fas fa-arrow-left"></i>
+                        </div>
                     </div>
-                    <div class="example-item" data-code='name = input("ما اسمك؟ ")\nprint(f"أهلاً {name}!")'>
-                        التفاعل مع المستخدم
+
+                    <div class="example-category">
+                        <h4>🧮 العمليات الحسابية</h4>
+                        <div class="example-item" data-code='a = 15\nb = 4\nprint(f"{a} + {b} = {a+b}")\nprint(f"{a} - {b} = {a-b}")\nprint(f"{a} × {b} = {a*b}")\nprint(f"{a} ÷ {b} = {a/b}")\nprint(f"{a} % {b} = {a%b}")'>
+                            <span>العمليات الأساسية</span>
+                            <i class="fas fa-arrow-left"></i>
+                        </div>
+                        <div class="example-item" data-code='import math\nprint(f"الجذر التربيعي لـ 64: {math.sqrt(64)}")\nprint(f"قيمة π: {math.pi:.4f}")\nprint(f"الأس: {math.pow(2, 8)}")'>
+                            <span>مكتبة math</span>
+                            <i class="fas fa-arrow-left"></i>
+                        </div>
                     </div>
-                    <div class="example-item" data-code='for i in range(1, 6):\n    print(i)'>
-                        حلقة for بسيطة
+
+                    <div class="example-category">
+                        <h4>📊 هياكل البيانات</h4>
+                        <div class="example-item" data-code='numbers = [1, 2, 3, 4, 5]\nprint(f"القائمة: {numbers}")\nprint(f"المجموع: {sum(numbers)}")\nprint(f"أكبر عدد: {max(numbers)}")\nfor num in numbers:\n    print(f"مربع {num} هو {num**2}")'>
+                            <span>القوائم والحلقات</span>
+                            <i class="fas fa-arrow-left"></i>
+                        </div>
+                        <div class="example-item" data-code='student = {"name": "أحمد", "age": 25, "grades": [95, 87, 92]}\nfor key, value in student.items():\n    print(f"{key}: {value}")\nprint(f"المعدل: {sum(student[&quot;grades&quot;])/len(student[&quot;grades&quot;]):.1f}")'>
+                            <span>القواميس</span>
+                            <i class="fas fa-arrow-left"></i>
+                        </div>
+                    </div>
+
+                    <div class="example-category">
+                        <h4>⚙️ دوال متقدمة</h4>
+                        <div class="example-item" data-code='def factorial(n):\n    if n == 0:\n        return 1\n    else:\n        return n * factorial(n-1)\n\nprint(f"عاملي 5: {factorial(5)}")\nprint(f"عاملي 7: {factorial(7)}")'>
+                            <span>الدوال العودية</span>
+                            <i class="fas fa-arrow-left"></i>
+                        </div>
+                        <div class="example-item" data-code='def is_prime(num):\n    if num < 2:\n        return False\n    for i in range(2, int(num**0.5)+1):\n        if num % i == 0:\n            return False\n    return True\n\nfor i in range(1, 20):\n    if is_prime(i):\n        print(f"{i} هو عدد أولي")'>
+                            <span>الأعداد الأولية</span>
+                            <i class="fas fa-arrow-left"></i>
+                        </div>
                     </div>
                 </div>
-                <div class="example-category">
-                    <h4>عمليات رياضية</h4>
-                    <div class="example-item" data-code='a = 5\nb = 3\nprint(f"{a} + {b} = {a+b}")\nprint(f"{a} - {b} = {a-b}")\nprint(f"{a} * {b} = {a*b}")\nprint(f"{a} / {b} = {a/b}")'>
-                        العمليات الحسابية الأساسية
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة المساعدة -->
+    <div class="modal" id="help-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-question-circle"></i> مساعدة Python Terminal Pro</h3>
+                <button class="close-btn" id="close-help">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="help-sections">
+                    <div class="help-section">
+                        <h4>🎯 كيفية الاستخدام</h4>
+                        <ul>
+                            <li>اكتب كود بايثون في منطقة المحرر</li>
+                            <li>اضغط <kbd>Ctrl + Enter</kbd> أو زر "تشغيل" لتنفيذ الكود</li>
+                            <li>استخدم التيرمينال للأوامر السريعة</li>
+                            <li>يمكنك حفظ وفتح الملفات مباشرة من المتصفح</li>
+                        </ul>
                     </div>
-                    <div class="example-item" data-code='import math\nprint(f"الجذر التربيعي لـ 16 هو: {math.sqrt(16)}")\nprint(f"قيمة باي: {math.pi}")'>
-                        استخدام مكتبة math
+
+                    <div class="help-section">
+                        <h4>⌨️ اختصارات لوحة المفاتيح</h4>
+                        <ul>
+                            <li><kbd>Ctrl + Enter</kbd> - تشغيل الكود</li>
+                            <li><kbd>Ctrl + S</kbd> - حفظ الكود</li>
+                            <li><kbd>Ctrl + O</kbd> - فتح ملف</li>
+                            <li><kbd>Ctrl + L</kbd> - مسح التيرمينال</li>
+                            <li><kbd>Tab</kbd> - إضافة مسافة بادئة</li>
+                        </ul>
                     </div>
-                </div>
-                <div class="example-category">
-                    <h4>هياكل البيانات</h4>
-                    <div class="example-item" data-code='my_list = [1, 2, 3, 4, 5]\nprint(f"القائمة: {my_list}")\nprint(f"العنصر الأول: {my_list[0]}")\nprint(f"العنصر الأخير: {my_list[-1]}")'>
-                        العمل مع القوائم
+
+                    <div class="help-section">
+                        <h4>🐍 الميزات المدعومة</h4>
+                        <ul>
+                            <li>جميع أنواع البيانات الأساسية في بايثون</li>
+                            <li>الحلقات والشروط والدوال</li>
+                            <li>مكتبات بايثون الأساسية (math, random, datetime)</li>
+                            <li>الاستثناءات ومعالجة الأخطاء</li>
+                            <li>دالة input() للتفاعل مع المستخدم</li>
+                        </ul>
                     </div>
-                    <div class="example-item" data-code='my_dict = {"name": "أحمد", "age": 25, "city": "القاهرة"}\nfor key, value in my_dict.items():\n    print(f"{key}: {value}")'>
-                        العمل مع القواميس
+
+                    <div class="help-section contact-info">
+                        <h4>📞 للتواصل مع المطور</h4>
+                        <p>تم تطوير هذا التيرمينال بواسطة <strong>أحمد</strong></p>
+                        <p>للتواصل عبر الواتساب:</p>
+                        <a href="https://wa.me/201096144345" class="whatsapp-btn" target="_blank">
+                            <i class="fab fa-whatsapp"></i>
+                            <span>01096144345</span>
+                        </a>
                     </div>
                 </div>
             </div>
