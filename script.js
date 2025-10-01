@@ -1,24 +1,34 @@
-// script.js
-// إصدار مبسط وعملي للتشغيل مع Pyodide داخل المتصفح
-// Author: prepared for abdelhamed nada (01086144345)
-
-const runBtn = document.getElementById('runBtn');
-const clearBtn = document.getElementById('clearBtn');
-const installBtn = document.getElementById('installBtn');
-const statusEl = document.getElementById('status');
-const codeEditor = document.getElementById('codeEditor');
-const outputEl = document.getElementById('output');
-const pkgInput = document.getElementById('pkgInput');
+// script.js — احترافي لموقع Python Terminal (ACE + Pyodide)
+// Prepared for: abdelhamed nada — 01086144345
 
 let pyodide = null;
-let isLoading = false;
+let running = false;
+const statusEl = document.getElementById('status');
+const outputEl = document.getElementById('output');
+const runBtn = document.getElementById('runBtn');
+const stopBtn = document.getElementById('stopBtn');
+const clearBtn = document.getElementById('clearBtn');
+const installBtn = document.getElementById('installBtn');
+const pkgInput = document.getElementById('pkgInput');
 
-function appendOutput(text, kind = 'log') {
-  // نوع: log / err / info
+// إعداد محرر ACE
+const editor = ace.edit("editor", {
+  mode: "ace/mode/python",
+  theme: "ace/theme/monokai",
+  value: document.getElementById('editor').textContent || '',
+  showPrintMargin: false,
+  fontSize: 14,
+  tabSize: 4,
+  useSoftTabs: true
+});
+editor.setOption("wrap", true);
+
+// أداة مساعد لطباعة بالـ output
+function appendOutput(text, cls = '') {
   const pre = document.createElement('pre');
   pre.style.whiteSpace = 'pre-wrap';
   pre.style.margin = '0 0 8px 0';
-  pre.className = kind === 'err' ? 'text-red-400' : 'text-green-200';
+  pre.className = cls;
   pre.textContent = text;
   outputEl.appendChild(pre);
   outputEl.scrollTop = outputEl.scrollHeight;
@@ -28,44 +38,41 @@ function setStatus(s) {
   statusEl.textContent = s;
 }
 
-// تحميل Pyodide ديناميكيًا
-async function loadPyodideAndPackages() {
-  if (pyodide || isLoading) return;
-  isLoading = true;
-  setStatus('جارِ تحميل Pyodide...');
+// تحميل Pyodide
+async function loadPyodideIfNeeded() {
+  if (pyodide) return;
+  setStatus('تحميل Pyodide...');
   try {
-    await import(window.PYODIDE_URL);
-    // globalThis.loadPyodide is provided by script
-    pyodide = await globalThis.loadPyodide({
-      indexURL: window.PYODIDE_URL.replace('/pyodide.js', '/')
+    pyodide = await loadPyodide({
+      indexURL: "https://cdn.jsdelivr.net/pyodide/v0.23.4/full/"
     });
-    setStatus('Pyodide جاهز.');
-    appendOutput('✅ Pyodide محمل وجاهز للعمل.', 'info');
-  } catch (e) {
-    console.error(e);
-    setStatus('فشل تحميل Pyodide');
-    appendOutput('❌ خطأ في تحميل Pyodide: ' + (e.message || e), 'err');
-  } finally {
-    isLoading = false;
+    // تحميل micropip مبكرًا لتسهيل تثبيت الباكيجات لاحقًا
+    await pyodide.loadPackage('micropip').catch(()=>{});
+    setStatus('جاهز');
+    appendOutput('✅ Pyodide محمل - جاهز للتشغيل');
+  } catch (err) {
+    appendOutput('❌ فشل في تحميل Pyodide: ' + String(err));
+    setStatus('خطأ في التحميل');
+    console.error(err);
   }
 }
 
-// تشغيل الكود الموجود في المحرر
+// دالة لتشغيل الكود (تلتقط stdout/stderr)
 async function runCode() {
-  if (!pyodide) {
-    appendOutput('Pyodide لم يُحمّل بعد — جاري التحميل الآن...', 'info');
-    await loadPyodideAndPackages();
-  }
-  const code = codeEditor.value || '';
-  if (!code.trim()) {
-    appendOutput('لا يوجد كود لتشغيله.', 'info');
+  await loadPyodideIfNeeded();
+  if (!pyodide) return;
+  if (running) {
+    appendOutput('— هناك عملية تشغيل جارية —');
     return;
   }
-
+  running = true;
   setStatus('تشغيل...');
-  appendOutput('--- تشغيل الكود ---', 'info');
+  outputEl.innerHTML = ''; // نعرض مخرجات جديدة
+  appendOutput('--- بدء التنفيذ ---');
 
-  // نغلف الكود لالتقاط stdout/stderr
+  const userCode = editor.getValue();
+
+  // Wrap to capture stdout/stderr reliably
   const wrapped = `
 import sys, io, traceback
 _buf = io.StringIO()
@@ -73,7 +80,7 @@ _old_out, _old_err = sys.stdout, sys.stderr
 sys.stdout = _buf
 sys.stderr = _buf
 try:
-${code.split('\n').map(line => '    ' + line).join('\n')}
+${userCode.split('\n').map(l => '    ' + l).join('\n')}
 except Exception:
     traceback.print_exc()
 finally:
@@ -83,66 +90,53 @@ _output = _buf.getvalue()
 `;
 
   try {
+    // runPythonAsync may throw if code blocks; timeouts not supported — keep simple
     await pyodide.runPythonAsync(wrapped);
     const out = pyodide.globals.get('_output');
-    appendOutput(out || '<لا يوجد مخرجات>', 'log');
+    appendOutput(out || '<لا يوجد مخرجات>');
   } catch (err) {
-    appendOutput(String(err), 'err');
+    appendOutput('❌ خطأ أثناء التنفيذ:\n' + String(err), 'error');
     console.error(err);
   } finally {
+    running = false;
     setStatus('جاهز');
   }
 }
 
 // تثبيت باكيج عبر micropip
 async function installPackage(pkgName) {
-  if (!pyodide) {
-    appendOutput('لم يُحمّل Pyodide بعد. سيتم تحميله الآن...', 'info');
-    await loadPyodideAndPackages();
-  }
-  if (!pkgName || !pkgName.trim()) {
-    appendOutput('اكتب اسم الباكيج في الحقل ثم اضغط تثبيت.', 'info');
+  if (!pkgName) {
+    appendOutput('اكتب اسم الباكيج في الحقل ثم اضغط تثبيت.');
     return;
   }
-
-  setStatus(`تثبيت ${pkgName} ...`);
-  appendOutput(`جاري تثبيت: ${pkgName} ...`, 'info');
-
+  await loadPyodideIfNeeded();
+  if (!pyodide) return;
+  setStatus(`تثبيت ${pkgName}...`);
+  appendOutput(`⏳ تثبيت ${pkgName} ...`);
   try {
-    await pyodide.loadPackage('micropip');
     await pyodide.runPythonAsync(`
 import micropip
 await micropip.install(${JSON.stringify(pkgName)})
 `);
-    appendOutput(`✅ تم تثبيت ${pkgName}`, 'info');
+    appendOutput(`✅ تم تثبيت ${pkgName}`);
   } catch (err) {
-    appendOutput(`❌ فشل تثبيت ${pkgName}: ${err}`, 'err');
+    appendOutput(`❌ فشل تثبيت ${pkgName}: ${err}`);
     console.error(err);
   } finally {
     setStatus('جاهز');
   }
 }
 
-// أحداث الأزرار
-runBtn.addEventListener('click', async () => {
-  runBtn.disabled = true;
-  runBtn.classList.add('opacity-70');
-  await runCode();
-  runBtn.disabled = false;
-  runBtn.classList.remove('opacity-70');
+// أزرار الأحداث
+runBtn.addEventListener('click', runCode);
+clearBtn.addEventListener('click', () => { outputEl.innerHTML = ''; appendOutput('تم مسح الأوتبوت.'); });
+installBtn.addEventListener('click', () => { installPackage(pkgInput.value.trim()); });
+stopBtn.addEventListener('click', () => {
+  // ملاحظة: Pyodide لا يدعم إيقاف الـ Python بسهولة من الواجهة. فقط إعلام المستخدم.
+  appendOutput('إيقاف غير مدعوم حالياً — استخدم كود أقصر أو أعد تحميل الصفحة.');
 });
 
-clearBtn.addEventListener('click', () => {
-  outputEl.innerHTML = '';
-  appendOutput('تم مسح الأوتبوت.', 'info');
-});
-
-installBtn.addEventListener('click', async () => {
-  const pkg = pkgInput.value.trim();
-  await installPackage(pkg);
-});
-
-// تحميل تلقائي عند الدخول (غير متزامن)
-window.addEventListener('DOMContentLoaded', () => {
-  loadPyodideAndPackages();
+// تحميل آلي للـ Pyodide عند فتح الصفحة (خلفي)
+window.addEventListener('load', () => {
+  loadPyodideIfNeeded();
 });
