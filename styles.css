@@ -1,34 +1,40 @@
-/* styles.css - تحسينات واجهة وخفيف انيميشن */
-body { margin: 0; padding: 0; }
-
-/* تلميحات بسيطة للتمرير */
-#output::-webkit-scrollbar { height: 8px; width: 8px; }
-#output::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.06); border-radius: 8px; }
-
-/* أنيميشن تحميل */
-@keyframes pulseGlow {
-  0% { box-shadow: 0 0 0 0 rgba(110,231,183,0.0); }
-  70% { box-shadow: 0 0 20px 6px rgba(110,231,183,0.04); }
-  100% { box-shadow: 0 0 0 0 rgba(110,231,183,0.0); }
+:root{
+  --bg:#000000;
+  --panel:#0b0b0b;
+  --muted:#7b8588;
+  --accent:#22c55e;
+  --glass: rgba(255,255,255,0.03);
 }
-#runBtn { animation: pulseGlow 3s infinite; }
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;padding:0;background:var(--bg);color:#e6eef0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial}
+.topbar{display:flex;justify-content:space-between;align-items:center;padding:14px 24px;border-bottom:1px solid rgba(255,255,255,0.03);background:linear-gradient(180deg,#010101,#050505)}
+.brand .logo{font-weight:800;letter-spacing:1px;color:var(--accent);font-size:18px}
+.brand .title{font-size:13px;color:var(--muted)}
+.dev{font-size:13px;text-align:left}
+.dev .dev-name span,.dev .dev-contact span{color:var(--accent);font-weight:600}
 
-/* ثابتة الواجهة: منع العناصر من التحرك بشكل مفاجئ */
-textarea, #output { transition: box-shadow .12s ease, transform .08s ease; }
+.container{display:grid;grid-template-columns:1fr 360px;gap:18px;max-width:1200px;margin:22px auto;padding:0 18px}
+.left{min-height:520px;background:linear-gradient(180deg,#070707,#0b0b0b);border:1px solid rgba(255,255,255,0.03);border-radius:10px;overflow:hidden;display:flex;flex-direction:column}
+.toolbar{display:flex;align-items:center;gap:8px;padding:12px;border-bottom:1px solid rgba(255,255,255,0.02)}
+.btn{background:transparent;border:1px solid rgba(255,255,255,0.04);color:#dfeff0;padding:8px 10px;border-radius:8px;cursor:pointer;font-weight:600}
+.btn.primary{background:linear-gradient(90deg,#16a34a,#22c55e);border:none;color:#001;box-shadow:0 6px 20px rgba(34,197,94,0.08)}
+.pkg-input{background:transparent;border:1px solid rgba(255,255,255,0.03);padding:8px;border-radius:8px;color:#dfeff0;margin-left:6px;width:120px}
+.status{margin-left:auto;color:var(--muted);font-size:13px}
 
-/* watermark رقيق في الزاوية */
-body::after {
-  content: "abdelhamed nada • 01086144345";
-  position: fixed;
-  bottom: 8px;
-  left: 8px;
-  font-size: 10px;
-  color: rgba(255,255,255,0.03);
-  pointer-events: none;
-  user-select: none;
+.editor{height:520px;background:transparent;padding:0 10px}
+.right{display:flex;flex-direction:column;gap:12px}
+.panel{background:var(--panel);border:1px solid rgba(255,255,255,0.03);border-radius:10px;padding:12px;overflow:hidden}
+.panel-title{font-weight:700;color:var(--muted);margin-bottom:8px}
+.output{height:360px;overflow:auto;background:transparent;border-radius:8px;padding:10px;font-family:monospace;font-size:13px;color:#cfeee2;background:linear-gradient(180deg,rgba(255,255,255,0.01),transparent)}
+.panel-body{color:var(--muted);font-size:13px}
+.footer{max-width:1200px;margin:0 auto;padding:12px 18px;color:rgba(255,255,255,0.06);font-size:13px}
+
+/* small screens */
+@media (max-width:900px){
+  .container{grid-template-columns:1fr; padding-bottom:30px}
+  .editor{height:420px}
+  .output{height:240px}
 }
 
-/* responsive tweaks */
-@media (max-width: 768px) {
-  #codeEditor { height: 44vh !important; }
-}
+/* watermark discreet */
+body::after{content:"abdelhamed nada • 01086144345";position:fixed;left:10px;bottom:6px;font-size:10px;color:rgba(255,255,255,0.03);pointer-events:none}
