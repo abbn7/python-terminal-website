@@ -1,198 +1,227 @@
-// تنفيذ بايثون في المتصفح باستخدام Pyodide
+// تهيئة Pyodide وتشغيل بايثون في المتصفح
 let pyodide;
+let isPyodideLoading = false;
 
-// تهيئة Pyodide
-async function initializePyodide() {
+// تهيئة التطبيق
+async function initializeApp() {
+    updateStatus('جاري تحميل بيئة بايثون...', 'loading');
+    
     try {
-        // عرض رسالة تحميل
-        addOutputLine("جاري تحميل بيئة بايثون...", "info");
-        
         // تحميل Pyodide
-        pyodide = await loadPyodide();
+        pyodide = await loadPyodide({
+            indexURL: "https://cdn.jsdelivr.net/pyodide/v0.23.4/full/"
+        });
         
-        // إضافة مكتبات Python المطلوبة
+        // تحميل الحزم الأساسية
         await pyodide.loadPackage(["micropip"]);
         
-        // إخفاء رسالة التحميل وإظهار رسالة الترحيب
-        clearOutput();
-        addOutputLine("✅ تم تحميل بيئة بايثون بنجاح!", "success");
-        addOutputLine("يمكنك الآن كتابة وتشغيل كود بايثون مباشرة في المتصفح.", "info");
-        addOutputLine("اضغط على زر 'تشغيل' أو Ctrl+Enter لتشغيل الكود.", "info");
+        // إعداد بيئة بايثون
+        await setupPythonEnvironment();
+        
+        updateStatus('جاهز - بايثون 3.11', 'ready');
+        addTerminalOutput('✅ تم تحميل بيئة بايثون بنجاح!', 'success');
+        addTerminalOutput('🐍 يمكنك الآن كتابة وتنفيذ كود بايثون', 'info');
+        addTerminalOutput('💡 استخدم المحرر للأكواد الطويلة أو التيرمينال للأوامر السريعة', 'info');
+        
     } catch (error) {
-        console.error("خطأ في تحميل Pyodide:", error);
-        addOutputLine("❌ حدث خطأ أثناء تحميل بيئة بايثون. يرجى تحديث الصفحة والمحاولة مرة أخرى.", "error");
+        console.error('خطأ في تحميل Pyodide:', error);
+        updateStatus('خطأ في التحميل', 'error');
+        addTerminalOutput('❌ فشل في تحميل بيئة بايثون. يرجى تحديث الصفحة.', 'error');
     }
 }
 
-// تشغيل كود بايثون
-async function runPythonCode() {
-    if (!pyodide) {
-        addOutputLine("⏳ بيئة بايثون仍在 التحميل، يرجى الانتظار...", "warning");
-        return;
-    }
+// إعداد بيئة بايثون
+async function setupPythonEnvironment() {
+    // إعادة توجيه الإخراج إلى التيرمينال
+    pyodide.runPython(`
+        import sys
+        import js
+        
+        class OutputLogger:
+            def __init__(self, output_type):
+                self.output_type = output_type
+                
+            def write(self, text):
+                if text.strip():
+                    js.addTerminalOutput(text, self.output_type)
+                    
+            def flush(self):
+                pass
+        
+        sys.stdout = OutputLogger('output')
+        sys.stderr = OutputLogger('error')
+    `);
+}
+
+// تحديث حالة التطبيق
+function updateStatus(message, type = 'ready') {
+    const statusElement = document.getElementById('status');
+    statusElement.textContent = `● ${message}`;
+    statusElement.className = `status-indicator ${type}`;
+}
+
+// إضافة نص إلى التيرمينال
+function addTerminalOutput(text, type = 'output') {
+    const terminalOutput = document.getElementById('terminal-output');
+    const outputLine = document.createElement('div');
+    outputLine.className = `output-line ${type}`;
     
-    const code = document.getElementById('python-code').value;
+    // معالجة النص للحفاظ على المسافات
+    outputLine.innerHTML = text.replace(/\n/g, '<br>').replace(/ /g, '&nbsp;');
+    
+    terminalOutput.appendChild(outputLine);
+    terminalOutput.scrollTop = terminalOutput.scrollHeight;
+}
+
+// تشغيل كود بايثون من المحرر
+async function runPythonCode() {
+    const code = document.getElementById('code-input').value;
     
     if (!code.trim()) {
-        addOutputLine("⚠️ يرجى كتابة كود بايثون أولاً.", "warning");
+        addTerminalOutput('⚠️ يرجى كتابة كود بايثون أولاً', 'warning');
         return;
     }
     
-    // إضافة فاصل للإخراج
-    addOutputLine("=".repeat(50), "info");
-    addOutputLine("تشغيل الكود...", "info");
+    updateStatus('جاري التشغيل...', 'loading');
+    addTerminalOutput('🚀 تشغيل الكود...', 'info');
     
     try {
-        // محاكاة دالة input
-        let inputValues = [];
-        const originalInput = pyodide.globals.get('input');
-        
-        pyodide.globals.set('input', function(prompt) {
-            // في بيئة المتصفح، نستخدم prompt بدلاً من input
-            const value = window.prompt(prompt || "أدخل قيمة:");
-            inputValues.push(value);
-            return value || "";
-        });
-        
-        // تنفيذ الكود
-        const result = await pyodide.runPythonAsync(code);
-        
-        // استعادة دالة input الأصلية
-        pyodide.globals.set('input', originalInput);
-        
-        // عرض النتيجة إذا كانت موجودة
-        if (result !== undefined) {
-            addOutputLine(`النتيجة: ${result}`, "success");
-        }
-        
-        addOutputLine("✅ تم تنفيذ الكود بنجاح!", "success");
+        await pyodide.runPythonAsync(code);
+        updateStatus('جاهز - بايثون 3.11', 'ready');
     } catch (error) {
-        addOutputLine(`❌ خطأ: ${error.message}`, "error");
-        console.error("Python error:", error);
-    }
-}
-
-// إضافة سطر إلى منطقة الإخراج
-function addOutputLine(text, type = "normal") {
-    const outputContainer = document.getElementById('output');
-    const line = document.createElement('div');
-    line.className = `output-line ${type}-line`;
-    line.textContent = text;
-    outputContainer.appendChild(line);
-    
-    // التمرير إلى الأسفل
-    outputContainer.scrollTop = outputContainer.scrollHeight;
-}
-
-// مسح منطقة الإخراج
-function clearOutput() {
-    document.getElementById('output').innerHTML = '';
-}
-
-// تحديث أرقام الأسطر في المحرر
-function updateLineNumbers() {
-    const editor = document.getElementById('python-code');
-    const lineNumbers = document.querySelector('.line-numbers');
-    
-    const lines = editor.value.split('\n').length;
-    let lineNumbersHTML = '';
-    
-    for (let i = 1; i <= Math.max(lines, 10); i++) {
-        lineNumbersHTML += `<div class="line-number">${i}</div>`;
-    }
-    
-    lineNumbers.innerHTML = lineNumbersHTML;
-}
-
-// فتح نافذة الأمثلة
-function openExamplesModal() {
-    document.getElementById('examples-modal').classList.add('active');
-}
-
-// إغلاق نافذة الأمثلة
-function closeExamplesModal() {
-    document.getElementById('examples-modal').classList.remove('active');
-}
-
-// تحميل مثال في المحرر
-function loadExample(code) {
-    document.getElementById('python-code').value = code;
-    updateLineNumbers();
-    closeExamplesModal();
-}
-
-// نسخ الإخراج
-function copyOutput() {
-    const outputContainer = document.getElementById('output');
-    const text = outputContainer.innerText;
-    
-    navigator.clipboard.writeText(text).then(() => {
-        // عرض رسالة نجاح مؤقتة
-        const copyBtn = document.getElementById('copy-output');
-        const originalHTML = copyBtn.innerHTML;
-        copyBtn.innerHTML = '<i class="fas fa-check"></i>';
+        addTerminalOutput(`❌ خطأ: ${error.message}`, 'error');
+        updateStatus('خطأ في التنفيذ', 'error');
         
+        // إعادة تعيين الحالة بعد ثانيتين
         setTimeout(() => {
-            copyBtn.innerHTML = originalHTML;
+            updateStatus('جاهز - بايثون 3.11', 'ready');
         }, 2000);
-    });
+    }
 }
 
-// التبديل بين وضع الدارك واللايت
-function toggleTheme() {
-    const body = document.body;
-    const themeBtn = document.getElementById('theme-toggle');
+// تشغيل أمر من التيرمينال
+async function runTerminalCommand() {
+    const terminalInput = document.getElementById('terminal-input');
+    const command = terminalInput.value.trim();
     
-    if (body.classList.contains('light-theme')) {
-        body.classList.remove('light-theme');
-        themeBtn.innerHTML = '<i class="fas fa-moon"></i>';
-    } else {
-        body.classList.add('light-theme');
-        themeBtn.innerHTML = '<i class="fas fa-sun"></i>';
+    if (!command) return;
+    
+    // عرض الأمر في التيرمينال
+    addTerminalOutput(`>>> ${command}`, 'command');
+    
+    try {
+        await pyodide.runPythonAsync(command);
+    } catch (error) {
+        addTerminalOutput(`❌ خطأ: ${error.message}`, 'error');
     }
+    
+    // مسح حقل الإدخال
+    terminalInput.value = '';
 }
 
-// التبديل بين وضع الشاشة الكاملة
-function toggleFullscreen() {
-    if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen().catch(err => {
-            console.error(`خطأ في تفعيل وضع الشاشة الكاملة: ${err.message}`);
-        });
-    } else {
-        if (document.exitFullscreen) {
-            document.exitFullscreen();
-        }
+// تحديث أرقام الأسطر
+function updateLineNumbers() {
+    const codeInput = document.getElementById('code-input');
+    const lineNumbers = document.getElementById('line-numbers');
+    const lines = codeInput.value.split('\n').length;
+    
+    let numbersHTML = '';
+    for (let i = 1; i <= Math.max(lines, 1); i++) {
+        numbersHTML += `<span>${i}</span>`;
     }
+    
+    lineNumbers.innerHTML = numbersHTML;
+    
+    // تحديث عدد الأسطر في شريط الحالة
+    document.getElementById('line-count').textContent = `${lines} سطر`;
 }
 
-// تهيئة الأحداث عند تحميل الصفحة
+// حفظ الكود
+function saveCode() {
+    const code = document.getElementById('code-input').value;
+    const blob = new Blob([code], { type: 'text/x-python' });
+    const url = URL.createObjectURL(blob);
+    
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'python_code.py';
+    a.click();
+    
+    URL.revokeObjectURL(url);
+    addTerminalOutput('💾 تم حفظ الكود بنجاح', 'success');
+}
+
+// فتح ملف
+function openFile(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        document.getElementById('code-input').value = e.target.result;
+        updateLineNumbers();
+        addTerminalOutput(`📂 تم فتح الملف: ${file.name}`, 'success');
+    };
+    reader.readAsText(file);
+}
+
+// تحميل مثال
+function loadExample(code) {
+    document.getElementById('code-input').value = code;
+    updateLineNumbers();
+    closeModal('examples-modal');
+    addTerminalOutput('📝 تم تحميل المثال', 'success');
+}
+
+// فتح نافذة
+function openModal(modalId) {
+    document.getElementById(modalId).classList.add('active');
+}
+
+// إغلاق نافذة
+function closeModal(modalId) {
+    document.getElementById(modalId).classList.remove('active');
+}
+
+// مسح التيرمينال
+function clearTerminal() {
+    document.getElementById('terminal-output').innerHTML = '';
+    addTerminalOutput('🧹 تم مسح التيرمينال', 'info');
+}
+
+// تحديث استخدام الذاكرة (محاكاة)
+function updateMemoryUsage() {
+    const usage = Math.floor(Math.random() * 50) + 10;
+    document.getElementById('memory-usage').textContent = `${usage}MB`;
+}
+
+// تهيئة الأحداث
 document.addEventListener('DOMContentLoaded', function() {
     // تهيئة Pyodide
-    initializePyodide();
+    initializeApp();
     
     // تحديث أرقام الأسطر
     updateLineNumbers();
     
-    // إضافة مستمعي الأحداث
-    document.getElementById('run-btn').addEventListener('click', runPythonCode);
-    document.getElementById('clear-btn').addEventListener('click', function() {
-        document.getElementById('python-code').value = '';
-        updateLineNumbers();
-    });
-    document.getElementById('clear-output').addEventListener('click', clearOutput);
-    document.getElementById('copy-output').addEventListener('click', copyOutput);
-    document.getElementById('examples-btn').addEventListener('click', openExamplesModal);
-    document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
-    document.getElementById('fullscreen-toggle').addEventListener('click', toggleFullscreen);
+    // إعداد مستمعي الأحداث
+    document.getElementById('run-code').addEventListener('click', runPythonCode);
+    document.getElementById('clear-terminal').addEventListener('click', clearTerminal);
+    document.getElementById('save-code').addEventListener('click', saveCode);
+    document.getElementById('examples-btn').addEventListener('click', () => openModal('examples-modal'));
+    document.getElementById('help-btn').addEventListener('click', () => openModal('help-modal'));
+    document.getElementById('execute-terminal').addEventListener('click', runTerminalCommand);
     
-    // إغلاق نافذة الأمثلة
-    document.querySelector('.close-modal').addEventListener('click', closeExamplesModal);
+    // إغلاق النوافذ
+    document.getElementById('close-examples').addEventListener('click', () => closeModal('examples-modal'));
+    document.getElementById('close-help').addEventListener('click', () => closeModal('help-modal'));
     
-    // إغلاق نافذة الأمثلة بالنقر خارجها
-    document.getElementById('examples-modal').addEventListener('click', function(e) {
-        if (e.target === this) {
-            closeExamplesModal();
-        }
+    // النقر خارج النوافذ لإغلاقها
+    document.querySelectorAll('.modal').forEach(modal => {
+        modal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.classList.remove('active');
+            }
+        });
     });
     
     // تحميل الأمثلة
@@ -203,78 +232,64 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     // تحديث أرقام الأسطر عند الكتابة
-    document.getElementById('python-code').addEventListener('input', updateLineNumbers);
+    document.getElementById('code-input').addEventListener('input', updateLineNumbers);
     
-    // اختصار لوحة المفاتيح لتشغيل الكود (Ctrl+Enter)
-    document.getElementById('python-code').addEventListener('keydown', function(e) {
+    // اختصارات لوحة المفاتيح
+    document.getElementById('code-input').addEventListener('keydown', function(e) {
         if (e.ctrlKey && e.key === 'Enter') {
+            e.preventDefault();
             runPythonCode();
         }
-    });
-    
-    // إضافة تأثيرات عند التمرير
-    window.addEventListener('scroll', function() {
-        const navbar = document.querySelector('.navbar');
-        if (window.scrollY > 50) {
-            navbar.style.backgroundColor = 'rgba(15, 20, 25, 0.95)';
-            navbar.style.backdropFilter = 'blur(10px)';
-        } else {
-            navbar.style.backgroundColor = '';
-            navbar.style.backdropFilter = '';
+        
+        if (e.ctrlKey && e.key === 's') {
+            e.preventDefault();
+            saveCode();
+        }
+        
+        // Tab support
+        if (e.key === 'Tab') {
+            e.preventDefault();
+            const start = this.selectionStart;
+            const end = this.selectionEnd;
+            
+            this.value = this.value.substring(0, start) + '    ' + this.value.substring(end);
+            this.selectionStart = this.selectionEnd = start + 4;
         }
     });
-});
-
-// إضافة أنيميشن للعناصر عند التمرير
-const observerOptions = {
-    threshold: 0.1,
-    rootMargin: '0px 0px -50px 0px'
-};
-
-const observer = new IntersectionObserver(function(entries) {
-    entries.forEach(entry => {
-        if (entry.isIntersecting) {
-            entry.target.style.opacity = '1';
-            entry.target.style.transform = 'translateY(0)';
+    
+    // تشغيل الأوامر في التيرمينال بالضغط على Enter
+    document.getElementById('terminal-input').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            runTerminalCommand();
         }
     });
-}, observerOptions);
-
-// مراقبة العناصر لإضافة الأنيميشن
-document.addEventListener('DOMContentLoaded', function() {
-    const animatedElements = document.querySelectorAll('.sidebar, .editor-section, .output-section');
     
-    animatedElements.forEach(el => {
-        el.style.opacity = '0';
-        el.style.transform = 'translateY(20px)';
-        el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-        observer.observe(el);
-    });
+    // فتح الملفات
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = '.py,.txt';
+    fileInput.style.display = 'none';
+    document.body.appendChild(fileInput);
+    
+    document.getElementById('load-code').addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', openFile);
+    
+    // تحديث استخدام الذاكرة كل 5 ثواني
+    setInterval(updateMemoryUsage, 5000);
+    
+    // إضافة تأثير كتابة للترحيب
+    setTimeout(() => {
+        addTerminalOutput('🎉 ابدأ بكتابة كود بايثون في المحرر أو التيرمينال!', 'success');
+    }, 1000);
 });
 
-// CSS للوضع الفاتح
-const lightThemeStyles = `
-    .light-theme {
-        --bg-dark: #f5f7fa;
-        --bg-darker: #e4e7eb;
-        --bg-card: #ffffff;
-        --text-primary: #2d3748;
-        --text-secondary: #4a5568;
-        --border-color: #cbd5e0;
-    }
-    
-    .light-theme .navbar {
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    }
-    
-    .light-theme .sidebar,
-    .light-theme .editor-section,
-    .light-theme .output-section {
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-    }
-`;
+// التعامل مع الأخطاء غير المتوقعة
+window.addEventListener('error', function(e) {
+    addTerminalOutput(`⚠️ خطأ غير متوقع: ${e.message}`, 'error');
+});
 
-// إضافة أنماط الوضع الفاتح إلى الصفحة
-const styleSheet = document.createElement('style');
-styleSheet.textContent = lightThemeStyles;
-document.head.appendChild(styleSheet);
+// تحديث حالة Pyodide
+window.addEventListener('pyodide-loaded', function() {
+    updateStatus('بايثون جاهز', 'ready');
+});
